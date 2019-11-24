@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1005498807951",
+    "firebase_url": "https://gbksoft-tsymbaliuk.firebaseio.com",
+    "project_id": "gbksoft-tsymbaliuk",
+    "storage_bucket": "gbksoft-tsymbaliuk.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1005498807951:android:a4d7182c50500c796662fa",
+        "android_client_info": {
+          "package_name": "com.gbksoft.tsymbaliuk_functional"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1005498807951-hkbdkjnk7d7gh8lerb98qqfa2ku4mtu4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNEfXjE37X2j8w4njzTixdi8r2wkEWQAE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1005498807951-hkbdkjnk7d7gh8lerb98qqfa2ku4mtu4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
