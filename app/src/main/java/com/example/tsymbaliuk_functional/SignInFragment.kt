@@ -93,7 +93,7 @@ class SignInFragment : Fragment() {
         progressBar.visibility = View.GONE
         if (user != null) {
             signInButton.visibility = View.GONE
-            findNavController().navigate(R.id.action_signInFragment_to_mainFragment)
+           findNavController().navigate(R.id.action_signInFragment_to_mainFragment)
         } else {
             signInButton.visibility = View.VISIBLE
         }

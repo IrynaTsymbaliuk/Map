@@ -1,5 +1,6 @@
 package com.example.tsymbaliuk_functional
 
+/*TODO: sort by name, remove onitemclick in extension*/
 import androidx.fragment.app.Fragment
 import android.os.Bundle
 import android.view.ViewGroup
@@ -7,16 +8,29 @@ import android.view.LayoutInflater
 import android.view.View
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.list_fragment.view.*
+import java.util.*
+import kotlin.collections.ArrayList
 
-class ListFragment : Fragment() {
+class ListFragment : Fragment(), RecyclerViewAdapter.OnItemClickListener {
+    override fun onItemClick(
+        adapter: RecyclerView.Adapter<*>,
+        view: View?,
+        position: Int,
+        id: Int
+    ) {
+        mainVM.deleteGeopoint(mainVM.listOfGeopoints.value!![position].name!!)
+
+    }
 
     private lateinit var recyclerView: RecyclerView
-    private lateinit var viewAdapter: RecyclerViewAdapter
-    private lateinit var viewManager: RecyclerView.LayoutManager
+    private lateinit var adapter: RecyclerViewAdapter
     private lateinit var mainVM: MainViewModel
+    private var listForAdapter = listOf<Geopoint>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -25,37 +39,41 @@ class ListFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.list_fragment, container, false)
 
-        mainVM =
-            ViewModelProvider(
-                activity!!,
-                ViewModelProvider.AndroidViewModelFactory(MyApplication())
-            )
-                .get(MainViewModel::class.java)
-
-        mainVM.getGeopoints().observe(this, Observer {
-            if (::viewAdapter.isInitialized) {
-                viewAdapter.updateData(it)
-                viewAdapter.notifyDataSetChanged()
-            } else {
-                setUpRecyclerView()
+        mainVM = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
+        mainVM.listOfGeopoints.observe(this, Observer {
+            if (it != null && it.size == 0) {
+                view.no_points.visibility = View.VISIBLE
+                view.recycler_view.visibility = View.INVISIBLE
+            } else if (it != null && it.size != 0) {
+                view.no_points.visibility = View.INVISIBLE
+                view.recycler_view.visibility = View.VISIBLE
+                onDataChange(it)
             }
         })
 
         recyclerView = view.recycler_view
-        setUpRecyclerView()
+        recyclerView.layoutManager = LinearLayoutManager(context)
+        recyclerView.itemAnimator = DefaultItemAnimator()
+        recyclerView.isNestedScrollingEnabled = false
+       /* if (listForAdapter.isNotEmpty()) {
+            listForAdapter = listForAdapter.sortedWith(compareBy { it.name?.toLowerCase(Locale.ROOT) })
+        }*/
+        adapter = RecyclerViewAdapter(listForAdapter)
+        adapter.onItemClickListener = this
+        recyclerView.adapter = adapter
 
         return view
 
     }
 
-    private fun setUpRecyclerView() {
-        viewManager = LinearLayoutManager(context)
-        if (mainVM.listOfGeopoints.value != null) {
-            viewAdapter = RecyclerViewAdapter(mainVM.listOfGeopoints.value!!)
-            recyclerView.apply {
-                layoutManager = viewManager
-                adapter = viewAdapter
-            }
+    private fun onDataChange(it: ArrayList<Geopoint>) {
+        listForAdapter = it
+        if (::adapter.isInitialized) {
+           /* if (listForAdapter.isNotEmpty()) {
+                listForAdapter = listForAdapter.sortedWith(compareBy { it.name?.toLowerCase(Locale.ROOT) })
+            }*/
+            adapter.updateData(listForAdapter)
+            adapter.notifyDataSetChanged()
         }
     }
 
