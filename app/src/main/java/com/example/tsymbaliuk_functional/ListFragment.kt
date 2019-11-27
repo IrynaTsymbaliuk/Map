@@ -1,30 +1,38 @@
 package com.example.tsymbaliuk_functional
-
-/*TODO: sort by name, remove onitemclick in extension*/
-import androidx.fragment.app.Fragment
+/*TODO: sort by name, remove onitemclick in extension, Nav not from mainfr*/
 import android.os.Bundle
-import android.view.ViewGroup
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.Marker
 import kotlinx.android.synthetic.main.list_fragment.view.*
-import java.util.*
-import kotlin.collections.ArrayList
 
 class ListFragment : Fragment(), RecyclerViewAdapter.OnItemClickListener {
+
     override fun onItemClick(
         adapter: RecyclerView.Adapter<*>,
         view: View?,
         position: Int,
         id: Int
     ) {
-        mainVM.deleteGeopoint(mainVM.listOfGeopoints.value!![position].name!!)
+        findNavController().navigate(MainFragmentDirections.actionMainFragmentToMapFragment(position))
+    }
 
+    override fun onLongItemClick(
+        adapter: RecyclerView.Adapter<*>,
+        view: View?,
+        position: Int,
+        id: Int
+    ) {
+        mainVM.deleteGeopoint(mainVM.listOfGeopoints.value!![position].id)
     }
 
     private lateinit var recyclerView: RecyclerView
@@ -40,7 +48,7 @@ class ListFragment : Fragment(), RecyclerViewAdapter.OnItemClickListener {
         val view = inflater.inflate(R.layout.list_fragment, container, false)
 
         mainVM = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
-        mainVM.listOfGeopoints.observe(this, Observer {
+        mainVM.listOfGeopoints.observe(viewLifecycleOwner, Observer {
             if (it != null && it.size == 0) {
                 view.no_points.visibility = View.VISIBLE
                 view.recycler_view.visibility = View.INVISIBLE
@@ -55,9 +63,6 @@ class ListFragment : Fragment(), RecyclerViewAdapter.OnItemClickListener {
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.itemAnimator = DefaultItemAnimator()
         recyclerView.isNestedScrollingEnabled = false
-       /* if (listForAdapter.isNotEmpty()) {
-            listForAdapter = listForAdapter.sortedWith(compareBy { it.name?.toLowerCase(Locale.ROOT) })
-        }*/
         adapter = RecyclerViewAdapter(listForAdapter)
         adapter.onItemClickListener = this
         recyclerView.adapter = adapter
@@ -69,12 +74,10 @@ class ListFragment : Fragment(), RecyclerViewAdapter.OnItemClickListener {
     private fun onDataChange(it: ArrayList<Geopoint>) {
         listForAdapter = it
         if (::adapter.isInitialized) {
-           /* if (listForAdapter.isNotEmpty()) {
-                listForAdapter = listForAdapter.sortedWith(compareBy { it.name?.toLowerCase(Locale.ROOT) })
-            }*/
             adapter.updateData(listForAdapter)
             adapter.notifyDataSetChanged()
         }
     }
+
 
 }

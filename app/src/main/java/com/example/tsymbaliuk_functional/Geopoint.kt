@@ -1,7 +1,22 @@
 package com.example.tsymbaliuk_functional
 
-class Geopoint (
-    var name: String? = "",
-    var latitude: Double? = 0.0,
-    var longitude: Double? = 0.0
-)
+import com.google.maps.android.clustering.ClusterItem
+import com.google.android.gms.maps.model.LatLng
+
+class Geopoint(var id: String, var name: String = "",  var latLng: LatLng = LatLng(0.0, 0.0)) : ClusterItem {
+
+
+
+    override fun getSnippet(): String {
+        return ""
+    }
+
+    override fun getTitle(): String {
+        return name
+    }
+
+    override fun getPosition(): LatLng {
+        return latLng
+    }
+
+}

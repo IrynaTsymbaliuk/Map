@@ -18,6 +18,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import com.google.android.gms.location.*
+import com.google.android.gms.maps.model.LatLng
 
 class MainActivity : AppCompatActivity() {
 
@@ -58,8 +59,7 @@ class MainActivity : AppCompatActivity() {
                     if (location == null) {
                         requestNewLocationData()
                     } else {
-                        mainVM.currentGeopoint.value?.latitude = location.latitude
-                        mainVM.currentGeopoint.value?.longitude = location.longitude
+                        mainVM.currentGeopoint.value?.latLng = LatLng(location.latitude, location.longitude)
                     }
                 }
             } else {
@@ -89,8 +89,7 @@ class MainActivity : AppCompatActivity() {
     private val mLocationCallback: LocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             val mLastLocation: Location = locationResult.lastLocation
-            mainVM.currentGeopoint.value?.latitude = mLastLocation.latitude
-            mainVM.currentGeopoint.value?.longitude = mLastLocation.longitude
+            mainVM.currentGeopoint.value?.latLng = LatLng(mLastLocation.latitude, mLastLocation.longitude)
         }
     }
 
@@ -123,19 +122,6 @@ class MainActivity : AppCompatActivity() {
             LocationManager.NETWORK_PROVIDER
         )
     }
-
-   /* fun onRequestPermissionsResult(
-         requestCode: Int,
-         permissions: Array<String?>?,
-         grantResults: IntArray
-     ) {
-         super.onRequestPermissionsResult(requestCode, permissions!!, grantResults)
-         if (requestCode == PERMISSION_ID) {
-             if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                 getLastLocation()
-             }
-         }
-     }*/
 
     override fun onResume() {
         super.onResume()
