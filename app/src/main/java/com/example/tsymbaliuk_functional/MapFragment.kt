@@ -1,72 +1,114 @@
 package com.example.tsymbaliuk_functional
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.location.Location
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import android.graphics.Bitmap
-import android.graphics.Canvas
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptor
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 
-class MapFragment : Fragment() {
+
+class MapFragment :
+    Fragment() {
+
+    private lateinit var mainVM: MainViewModel
+    private lateinit var mapFragment: SupportMapFragment
+    lateinit var map: GoogleMap
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_map, container, false)
+        val rootView: View = inflater.inflate(R.layout.fragment_map, container, false)
+        mapFragment =
+            childFragmentManager.findFragmentById(R.id.frg) as SupportMapFragment
 
-        val mapFragment =
-            childFragmentManager.findFragmentById(R.id.frg) as SupportMapFragment?
-        mapFragment!!.getMapAsync { mMap ->
-            mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
+        mainVM = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
 
-            mMap.clear()
+        mapFragment.getMapAsync { mMap ->
+            map = mMap
+            map.mapType = GoogleMap.MAP_TYPE_NORMAL
 
-            val googlePlex = CameraPosition.builder()
-                .target(com.google.android.gms.maps.model.LatLng(37.4219999, -122.0862462))
-                .zoom(10f)
-                .bearing(0f)
-                .tilt(45f)
-                .build()
 
-            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(googlePlex), 10000, null)
 
-            mMap.addMarker(
-                MarkerOptions()
-                    .position(com.google.android.gms.maps.model.LatLng(37.4219999, -122.0862462))
-                    .title("Spider Man")
-                    .icon(bitmapDescriptorFromVector(activity!!, R.drawable.ic_place_black_24dp))
-            )
+            mainVM.listOfGeopoints.observe(this, Observer { geopointsList ->
+                //if (::map.isInitialized) {
+                    drawMap(geopointsList)
+                //}
+            })
 
-            mMap.addMarker(
-                MarkerOptions()
-                    .position(com.google.android.gms.maps.model.LatLng(37.4629101, -122.2449094))
-                    .title("Iron Man")
-                    .snippet("His Talent : Plenty of money")
-            )
-
-            mMap.addMarker(
-                MarkerOptions()
-                    .position(com.google.android.gms.maps.model.LatLng(37.3092293, -122.1136845))
-                    .title("Captain America")
-            )
+            mainVM.currentGeopoint.observe(this, Observer { currentGeopoint ->
+                if (currentGeopoint.longitude != 0.0 && currentGeopoint.latitude != 0.0
+                    //&& ::map.isInitialized
+                    ) {
+                    zoomMap()
+                }
+            })
+            //map.clear()
         }
 
-        return view
+        return rootView
     }
 
-    private fun bitmapDescriptorFromVector(context: Context, vectorResId: Int): BitmapDescriptor {
+    private fun drawMap(geopointsList: ArrayList<Geopoint>?) {
+        if (geopointsList != null && geopointsList.size == 0) {
+            geopointsList.forEach { geopoint ->
+                if (geopoint.latitude != null && geopoint.longitude != null) {
+                    map.addMarker(
+                        MarkerOptions()
+                            .position(
+                                LatLng(
+                                    geopoint.latitude!!,
+                                    geopoint.longitude!!
+                                )
+                            )
+                            .title(geopoint.name)
+                            .icon(
+                                bitmapDescriptorFromVector(
+                                    activity!!,
+                                    R.drawable.ic_place_black_24dp
+                                )
+                            )
+                    )
+                }
+            }
+        }
+    }
+
+    private fun zoomMap() {
+        val googlePlex = CameraPosition.builder()
+            .target(
+                LatLng(
+                    mainVM.currentGeopoint.value!!.latitude!!,
+                    mainVM.currentGeopoint.value!!.longitude!!
+                )
+            )
+            .zoom(10f)
+            .bearing(0f)
+            .tilt(45f)
+            .build()
+        map.animateCamera(
+            CameraUpdateFactory.newCameraPosition(googlePlex),
+            10000,
+            null
+        )
+    }
+
+    private fun bitmapDescriptorFromVector(
+        context: Context,
+        vectorResId: Int
+    ): BitmapDescriptor {
         val vectorDrawable = ContextCompat.getDrawable(context, vectorResId)
         vectorDrawable!!.setBounds(
             0,

@@ -10,11 +10,13 @@ class MainViewModel : ViewModel() {
 
     var listOfGeopoints = MutableLiveData<ArrayList<Geopoint>>()
     private val repository: AppRepository = AppRepository.getInstance()
+    var currentGeopoint = MutableLiveData<Geopoint>()
 
     init {
         repository.geopointsLiveData.observeForever {
             listOfGeopoints.setValue(it)
         }
+        currentGeopoint.value = Geopoint("current location", 0.0, 0.0)
     }
 
     fun deleteGeopoint(documentName: String){
